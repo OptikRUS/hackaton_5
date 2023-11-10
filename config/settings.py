@@ -1,4 +1,7 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class SiteSettings(BaseSettings):
