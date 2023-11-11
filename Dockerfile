@@ -8,7 +8,7 @@ ENV SITE_HOST=0.0.0.0
 WORKDIR /
 
 # установка зависимостей
-COPY pyproject.toml .
+COPY poetry.lock pyproject.toml ./
 RUN pip install poetry  \
     && poetry config virtualenvs.create false \
     && poetry install --no-ansi --no-cache
