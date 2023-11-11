@@ -62,6 +62,8 @@ async def stream_video(name: str) -> StreamingResponse:
 @router.websocket("")
 async def websocket_video_endpoint(websocket: WebSocket):
     rtsp_url = websocket.headers.get("rtsp_url")
+    print("rtsp_url")
+    print(rtsp_url)
     await websocket.accept()
     yolo_model = set_model()
 
