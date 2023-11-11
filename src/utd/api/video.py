@@ -61,12 +61,12 @@ async def stream_video(name: str) -> StreamingResponse:
 
 @router.websocket("")
 async def websocket_video_endpoint(websocket: WebSocket):
-    rtsp_url = websocket.headers.get("rtsp_url")
+    await websocket.accept()
+    data = await websocket.receive_json()
+    rtsp_url = data["rtsp_url"]
     print("rtsp_url")
     print(rtsp_url)
-    await websocket.accept()
     yolo_model = set_model()
-
     # Откройте RTSP-поток
     cap = cv2.VideoCapture(rtsp_url)
     while cap.isOpened():
@@ -91,5 +91,9 @@ async def websocket_video_endpoint(websocket: WebSocket):
                                       (int(x_orig + w_orig / 2), int(y_orig + h_orig / 2)), (0, 0, 255), 2)
                         cv2.putText(frame, str(result.names[cur_id_box]), (int(x_orig), int(y_orig)),
                                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                await websocket.send_bytes(frame.tobytes())
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+                await websocket.send_bytes(frame)
+    cap.release()
+    cv2.destroyAllWindows()
     await websocket.close()
