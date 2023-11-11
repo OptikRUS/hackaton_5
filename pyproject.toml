@@ -16,6 +16,7 @@ pillow = "^10.1.0"
 ultralytics = "^8.0.208"
 opencv-python-headless = "^4.8.1.78"
 torch = "2.1.0"
+torch = { version = "2.1.0", extras = ["cpu"] }
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.3"
