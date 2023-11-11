@@ -13,9 +13,10 @@ uvicorn = {extras = ["standard"], version = "^0.21.1"}
 minio = "^7.1.17"
 opencv-python = "^4.8.1.78"
 pillow = "^10.1.0"
+torch = { version = "2.1.0", extras = ["cpu"] }
+torchvision = { version = "0.16.0", extras = ["cpu"] }
 ultralytics = "^8.0.208"
 opencv-python-headless = "^4.8.1.78"
-torch = { version = "2.1.0", extras = ["cpu"] }
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.3"
