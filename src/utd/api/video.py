@@ -1,6 +1,7 @@
 from io import BytesIO
 
 import cv2
+import torch
 from fastapi import APIRouter, WebSocket, UploadFile, File, status
 from starlette.responses import HTMLResponse, StreamingResponse
 from minio import Minio
@@ -18,6 +19,13 @@ client = Minio(
     secret_key=settings.S3.PASSWORD,
     secure=False,
 )
+
+
+def set_model():
+    model = YOLO(base_dir + "/best.pt")
+    device = torch.device('cpu')
+    model.to(device)
+    return model
 
 
 @router.post(
@@ -55,7 +63,7 @@ async def stream_video(name: str) -> StreamingResponse:
 async def websocket_video_endpoint(websocket: WebSocket):
     rtsp_url = websocket.headers.get("rtsp_url")
     await websocket.accept()
-    yolo_model = YOLO(base_dir + "/best.pt")
+    yolo_model = set_model()
 
     # Откройте RTSP-поток
     cap = cv2.VideoCapture(rtsp_url)
