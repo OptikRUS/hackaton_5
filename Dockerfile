@@ -8,10 +8,12 @@ ENV SITE_HOST=0.0.0.0
 WORKDIR /
 
 # установка зависимостей
-COPY poetry.lock pyproject.toml ./
+COPY pyproject.toml .
 RUN pip install poetry  \
     && poetry config virtualenvs.create false \
     && poetry install --no-ansi --no-cache
 
 # копирование проекта
 COPY . .
+
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
