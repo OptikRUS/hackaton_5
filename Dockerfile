@@ -16,4 +16,5 @@ RUN pip install poetry  \
 # копирование проекта
 COPY . .
 
+RUN pip install opencv-python==4.8.1.78
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu

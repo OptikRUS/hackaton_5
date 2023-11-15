@@ -21,20 +21,20 @@ services:
 #      - .env
 
   # minio service
-  minio:
-    image: minio/minio
-    restart: always
-    environment:
-      MINIO_ROOT_USER: ${MINIO_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
-    volumes:
-      - ${MINIO_PATH_DATA}
-    env_file:
-      - .env
-    command: server --address 0.0.0.0:${MINIO_PORT} --console-address :${MINIO_PORT_2} /data
-    ports:
-      - ${MINIO_HOST}:${MINIO_PORT}:${MINIO_PORT}
-      - ${MINIO_PORT_2}:${MINIO_PORT_2}
+#  minio:
+#    image: minio/minio
+#    restart: always
+#    environment:
+#      MINIO_ROOT_USER: ${MINIO_USER}
+#      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+#    volumes:
+#      - ${MINIO_PATH_DATA}
+#    env_file:
+#      - .env
+#    command: server --address 0.0.0.0:${MINIO_PORT} --console-address :${MINIO_PORT_2} /data
+#    ports:
+#      - ${MINIO_HOST}:${MINIO_PORT}:${MINIO_PORT}
+#      - ${MINIO_PORT_2}:${MINIO_PORT_2}
 
   # application service
   fastapi-app:
@@ -42,8 +42,8 @@ services:
     command: python main.py
     ports:
       - ${SITE_PORT}:${SITE_PORT}
-    depends_on:
-      - minio
+#    depends_on:
+#      - minio
     restart: always
     networks:
       - custom
