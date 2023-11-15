@@ -62,15 +62,13 @@ async def stream_video(name: str) -> StreamingResponse:
 async def websocket_video_endpoint(websocket: WebSocket):
     await websocket.accept()
     data = await websocket.receive_json()
-    if data.get("is_closed"):
-        await websocket.close()
-    rtsp_url = data["rtsp_url"]
+    rtsp_url = data.get("rtsp_url")
     yolo_model = set_model()
     cap = cv2.VideoCapture(rtsp_url)
     while cap.isOpened() and websocket.application_state == websocket.application_state.CONNECTED:
         while True:
             ret, frame = cap.read()
-            if not ret:
+            if not ret and websocket.application_state == websocket.application_state.CONNECTED:
                 break
 
             resized_frame = cv2.resize(frame, (640, 640))
@@ -90,9 +88,9 @@ async def websocket_video_endpoint(websocket: WebSocket):
                                       (int(x_orig + w_orig / 2), int(y_orig + h_orig / 2)), (0, 0, 255), 2)
                         cv2.putText(frame, str(result.names[cur_id_box]), (int(x_orig), int(y_orig)),
                                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                ret, buffer = cv2.imencode(".jpg", frame)
-                frame = buffer.tobytes()
-                await websocket.send_bytes(frame)
+            ret, buffer = cv2.imencode(".jpg", frame)
+            frame = buffer.tobytes()
+            await websocket.send_bytes(frame)
     cap.release()
     cv2.destroyAllWindows()
     await websocket.close()
