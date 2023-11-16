@@ -1,13 +1,11 @@
-from io import BytesIO
-
 import cv2
 import torch
 from config.settings import base_dir, settings
 from fastapi import APIRouter, File, UploadFile, WebSocket, status
 from minio import Minio
-from starlette.responses import HTMLResponse, StreamingResponse
 from ultralytics import YOLO
 
+from src.utd.models import Files
 from src.utd.schemas.files import UploadResponse
 
 router: APIRouter = APIRouter(prefix="/video", tags=["video"])
@@ -31,31 +29,18 @@ def set_model():
     "/upload", status_code=status.HTTP_201_CREATED, response_model=UploadResponse,
 )
 async def upload_video(file: UploadFile = File(...)):
-    uploaded = client.put_object(
-        bucket_name="videos",
-        object_name=file.filename,
-        data=file.file,
-        content_type=file.content_type,
-        length=file.size,
-    )
-    return UploadResponse(
-        bucket_name=uploaded.bucket_name,
-        object_name=uploaded.object_name,
-        etag=uploaded.etag,
-    )
+    file_path = f"src/uploads/{file.filename}"
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+    saved_video = await Files.create(filename=file.filename, path=file_path)
+    return {"filename": saved_video.filename, "path": saved_video.path}
 
 
 @router.get(
-    "/{name}", response_class=HTMLResponse, status_code=status.HTTP_206_PARTIAL_CONTENT,
+    "", status_code=status.HTTP_200_OK, response_model=list[UploadResponse],
 )
-async def stream_video(name: str) -> StreamingResponse:
-    bucket_object = client.get_object(bucket_name="videos", object_name=name)
-    return StreamingResponse(
-        BytesIO(bucket_object.read()),
-        headers=bucket_object.headers,
-        media_type="video/mp4",
-        status_code=status.HTTP_206_PARTIAL_CONTENT,
-    )
+async def get_videos():
+    return await Files.all()
 
 
 @router.websocket("")

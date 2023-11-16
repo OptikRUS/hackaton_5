@@ -10,7 +10,7 @@ python = "^3.11"
 fastapi = {extras = ["all"], version = "^0.104.1"}
 pydantic-settings = "^2.0.3"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
-minio = "^7.1.17"
+tortoise-orm = {extras = ["asyncpg"], version = "^0.20.0"}
 pillow = "^10.1.0"
 ultralytics = "^8.0.208"
 opencv-python-headless = "^4.8.1.78"

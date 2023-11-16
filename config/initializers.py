@@ -1,15 +1,15 @@
 from fastapi import FastAPI
+from tortoise.contrib.fastapi import register_tortoise
 
 from config.settings import settings
 
 
 def init_app() -> FastAPI:
-    app = FastAPI(
+    return FastAPI(
         title=settings.APP.TITLE,
         version=settings.APP.VERSION,
         summary=settings.APP.SUMMARY,
     )
-    return app
 
 
 def init_routers(application: FastAPI) -> None:
@@ -17,6 +17,16 @@ def init_routers(application: FastAPI) -> None:
 
     for router in get_routers():
         application.include_router(router)
+
+
+def init_database(application: FastAPI) -> None:
+    register_tortoise(
+        application,
+        db_url="sqlite://:memory:",
+        modules={"models": ["src.utd.models"]},
+        generate_schemas=True,
+        add_exception_handlers=True,
+    )
 
 
 def init_cors(application: FastAPI) -> None:
