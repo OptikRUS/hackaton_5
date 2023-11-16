@@ -2,7 +2,6 @@ import cv2
 import torch
 from config.settings import base_dir, settings
 from fastapi import APIRouter, File, UploadFile, WebSocket, status
-from minio import Minio
 from ultralytics import YOLO
 
 from src.utd.models import Files
@@ -10,12 +9,12 @@ from src.utd.schemas.files import UploadResponse
 
 router: APIRouter = APIRouter(prefix="/video", tags=["video"])
 
-client = Minio(
-    endpoint=f"{settings.S3.HOST}:{settings.S3.PORT}",
-    access_key=settings.S3.USER,
-    secret_key=settings.S3.PASSWORD,
-    secure=False,
-)
+# client = Minio(
+#     endpoint=f"{settings.S3.HOST}:{settings.S3.PORT}",
+#     access_key=settings.S3.USER,
+#     secret_key=settings.S3.PASSWORD,
+#     secure=False,
+# )
 
 
 def set_model():
