@@ -1,6 +1,6 @@
 import cv2
 import torch
-from config.settings import base_dir, settings
+from config.settings import base_dir
 from fastapi import APIRouter, File, UploadFile, WebSocket, status
 from ultralytics import YOLO
 
@@ -8,13 +8,6 @@ from src.utd.models import Files
 from src.utd.schemas.files import UploadResponse
 
 router: APIRouter = APIRouter(prefix="/video", tags=["video"])
-
-# client = Minio(
-#     endpoint=f"{settings.S3.HOST}:{settings.S3.PORT}",
-#     access_key=settings.S3.USER,
-#     secret_key=settings.S3.PASSWORD,
-#     secure=False,
-# )
 
 
 def set_model():
@@ -57,23 +50,22 @@ async def websocket_video_endpoint(websocket: WebSocket):
 
             resized_frame = cv2.resize(frame, (640, 640))
             results = yolo_model(resized_frame)
-            if (len(results) > 0):
-                print(results)
-                for result in results:
-                    boxes = result.boxes.xywh.cpu()
-                    for idx in range(len(boxes)):
-                        cur_id_box = int(result.boxes[idx].cls.item())
-                        x, y, w, h = boxes[idx]
-                        x_orig = int(x * frame.shape[1] / 640)
-                        y_orig = int(y * frame.shape[0] / 640)
-                        w_orig = int(w * frame.shape[1] / 640)
-                        h_orig = int(h * frame.shape[0] / 640)
-                        cv2.rectangle(frame, (int(x_orig - w_orig / 2), int(y_orig - h_orig / 2)),
-                                      (int(x_orig + w_orig / 2), int(y_orig + h_orig / 2)), (0, 0, 255), 2)
-                        cv2.putText(frame, str(result.names[cur_id_box]), (int(x_orig), int(y_orig)),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            has_object = False
+            for result in results:
+                boxes = result.boxes.xywh.cpu()
+                if len(boxes) > 0:
+                    has_object = True
+                for idx in range(len(boxes)):
+                    x, y, w, h = boxes[idx]
+                    x_orig = int(x * frame.shape[1] / 640)
+                    y_orig = int(y * frame.shape[0] / 640)
+                    w_orig = int(w * frame.shape[1] / 640)
+                    h_orig = int(h * frame.shape[0] / 640)
+                    cv2.rectangle(frame, (int(x_orig - w_orig / 2), int(y_orig - h_orig / 2)),
+                                  (int(x_orig + w_orig / 2), int(y_orig + h_orig / 2)), (0, 0, 255), 2)
             ret, buffer = cv2.imencode(".jpg", frame)
             frame = buffer.tobytes()
+            await websocket.send_json({"has_object": has_object})
             await websocket.send_bytes(frame)
     cap.release()
     cv2.destroyAllWindows()
