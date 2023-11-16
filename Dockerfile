@@ -9,9 +9,8 @@ WORKDIR /
 
 # установка зависимостей
 COPY pyproject.toml .
-RUN pip install poetry  \
-    && poetry config virtualenvs.create false \
-    && poetry install --no-ansi --no-cache
+RUN pip install poetry && poetry config virtualenvs.create false
+RUN poetry install --no-ansi --no-cache
 
 # копирование проекта
 COPY . .
